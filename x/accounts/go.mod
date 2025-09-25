@@ -1,11 +1,11 @@
 module cosmossdk.io/x/accounts
 
-go 1.21
+go 1.23
 
 require (
 	cosmossdk.io/api v0.7.1
 	cosmossdk.io/collections v0.4.0
-	cosmossdk.io/core v0.11.0
+	cosmossdk.io/core v1.0.0
 	github.com/cosmos/gogoproto v1.4.11
 	github.com/stretchr/testify v1.8.4
 	google.golang.org/grpc v1.58.3
@@ -13,7 +13,7 @@ require (
 )
 
 require (
-	cosmossdk.io/depinject v1.0.0-alpha.4 // indirect
+	cosmossdk.io/schema v1.0.0 // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
