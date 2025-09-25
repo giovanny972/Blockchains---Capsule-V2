@@ -7,7 +7,7 @@ require (
 	cosmossdk.io/collections v0.4.0
 	cosmossdk.io/core v0.11.0
 	github.com/cosmos/gogoproto v1.4.11
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.11.1
 	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.31.0
 )
