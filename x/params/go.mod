@@ -1,10 +1,10 @@
 module cosmossdk.io/x/params
 
-go 1.21
+go 1.23
 
 require (
 	cosmossdk.io/api v0.7.2-0.20230927090904-9dd34510e273
-	cosmossdk.io/core v0.12.0
+	cosmossdk.io/core v1.0.0
 	cosmossdk.io/depinject v1.0.0-alpha.4
 	cosmossdk.io/errors v1.0.0
 	cosmossdk.io/log v1.2.1
@@ -26,6 +26,7 @@ require (
 
 require (
 	cosmossdk.io/collections v0.4.0 // indirect
+	cosmossdk.io/schema v1.0.0 // indirect
 	cosmossdk.io/x/tx v0.10.0 // indirect
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
