@@ -18,6 +18,8 @@ dist
 tools-stamp
 buf-stamp
 artifacts
+simapp/simd/simd.exe
+simapp/simd/simd.exe~
 
 # Go
 go.work
