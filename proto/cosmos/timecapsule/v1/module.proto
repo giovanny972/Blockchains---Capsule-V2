@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package cosmos.timecapsule.v1;
+
+import "cosmos/app/v1alpha1/module.proto";
+
+option go_package = "github.com/cosmos/cosmos-sdk/x/timecapsule/types";
+
+// Module is the config object of the timecapsule module.
+message Module {
+  option (cosmos.app.v1alpha1.module) = {
+    go_import: "github.com/cosmos/cosmos-sdk/x/timecapsule"
+    use_package: {name: "github.com/cosmos/cosmos-sdk/x/timecapsule"}
+    requires_order_begin_blocker: true
+    requires_order_end_blocker: true
+    requires_order_init_genesis: true
+  };
+
+  // authority defines the custom module authority. If not set, defaults to the governance module.
+  string authority = 1;
+}

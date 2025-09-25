@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package cosmos.timecapsule.v1;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/timecapsule/v1/types.proto";
+
+option go_package = "github.com/cosmos/cosmos-sdk/x/timecapsule/types";
+
+// GenesisState defines the timecapsule module's genesis state.
+message GenesisState {
+  // params defines all the parameters of the module
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+  
+  // capsules is the list of all capsules
+  repeated Capsule capsules = 2 [(gogoproto.nullable) = false];
+  
+  // key_shares is the list of all key shares
+  repeated KeyShare key_shares = 3 [(gogoproto.nullable) = false];
+  
+  // condition_contracts is the list of all condition contracts
+  repeated ConditionContract condition_contracts = 4 [(gogoproto.nullable) = false];
+  
+  // next_capsule_id is the next available capsule ID
+  uint64 next_capsule_id = 5;
+  
+  // statistics contains the module statistics
+  Statistics statistics = 6 [(gogoproto.nullable) = false];
+}

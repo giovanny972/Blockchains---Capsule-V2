@@ -1,0 +1,210 @@
+syntax = "proto3";
+
+package cosmos.timecapsule.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "cosmos/timecapsule/v1/types.proto";
+
+option go_package = "github.com/cosmos/cosmos-sdk/x/timecapsule/types";
+
+// Msg defines the Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // CreateCapsule creates a new time capsule
+  rpc CreateCapsule(MsgCreateCapsule) returns (MsgCreateCapsuleResponse);
+  
+  // UnlockCapsule unlocks a time capsule
+  rpc UnlockCapsule(MsgUnlockCapsule) returns (MsgUnlockCapsuleResponse);
+  
+  // CancelCapsule cancels a time capsule
+  rpc CancelCapsule(MsgCancelCapsule) returns (MsgCancelCapsuleResponse);
+  
+  // UpdateHeartbeat updates the heartbeat for a dead man's switch capsule
+  rpc UpdateHeartbeat(MsgUpdateHeartbeat) returns (MsgUpdateHeartbeatResponse);
+  
+  // SubmitKeyShare submits a key share for a multi-signature capsule
+  rpc SubmitKeyShare(MsgSubmitKeyShare) returns (MsgSubmitKeyShareResponse);
+  
+  // UpdateParams updates the module parameters
+  rpc UpdateParams(MsgUpdateParams) returns (MsgUpdateParamsResponse);
+}
+
+// MsgCreateCapsule represents a message to create a new time capsule
+message MsgCreateCapsule {
+  option (cosmos.msg.v1.signer) = "creator";
+  option (amino.name) = "cosmos-sdk/MsgCreateCapsule";
+
+  // creator is the address of the capsule creator
+  string creator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // capsule_type defines the type of capsule to create
+  CapsuleType capsule_type = 2;
+  
+  // title is a human-readable title for the capsule
+  string title = 3;
+  
+  // description provides additional details about the capsule
+  string description = 4;
+  
+  // data contains the content to be encrypted in the capsule
+  bytes data = 5;
+  
+  // unlock_time specifies when the capsule can be unlocked (for TIME_LOCK type)
+  google.protobuf.Timestamp unlock_time = 6 [(gogoproto.stdtime) = true];
+  
+  // deposit represents any tokens to be deposited with the capsule
+  repeated cosmos.base.v1beta1.Coin deposit = 7 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  
+  // unlock_conditions contains condition-specific data for CONDITIONAL type
+  bytes unlock_conditions = 8;
+  
+  // required_signatures is the number of signatures needed for MULTI_SIG type
+  uint32 required_signatures = 9;
+  
+  // authorized_addresses are the addresses authorized to sign for MULTI_SIG type
+  repeated string authorized_addresses = 10 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // heartbeat_interval is the required heartbeat interval for DEAD_MANS_SWITCH type
+  int64 heartbeat_interval = 11;
+  
+  // beneficiaries are the addresses that can claim the capsule after unlock
+  repeated string beneficiaries = 12 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgCreateCapsuleResponse is the response for creating a capsule
+message MsgCreateCapsuleResponse {
+  // capsule_id is the ID of the newly created capsule
+  uint64 capsule_id = 1;
+}
+
+// MsgUnlockCapsule represents a message to unlock a time capsule
+message MsgUnlockCapsule {
+  option (cosmos.msg.v1.signer) = "unlocker";
+  option (amino.name) = "cosmos-sdk/MsgUnlockCapsule";
+
+  // unlocker is the address attempting to unlock the capsule
+  string unlocker = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // capsule_id is the ID of the capsule to unlock
+  uint64 capsule_id = 2;
+  
+  // key_shares contains the key shares needed to decrypt the capsule (for MULTI_SIG type)
+  repeated KeyShare key_shares = 3;
+  
+  // proof contains any proof required for conditional unlocking
+  bytes proof = 4;
+}
+
+// MsgUnlockCapsuleResponse is the response for unlocking a capsule
+message MsgUnlockCapsuleResponse {
+  // decrypted_data is the decrypted content of the capsule
+  bytes decrypted_data = 1;
+  
+  // released_deposit is any deposit that was released
+  repeated cosmos.base.v1beta1.Coin released_deposit = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgCancelCapsule represents a message to cancel a time capsule
+message MsgCancelCapsule {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "cosmos-sdk/MsgCancelCapsule";
+
+  // owner is the address of the capsule owner
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // capsule_id is the ID of the capsule to cancel
+  uint64 capsule_id = 2;
+  
+  // reason is the optional reason for cancellation
+  string reason = 3;
+}
+
+// MsgCancelCapsuleResponse is the response for cancelling a capsule
+message MsgCancelCapsuleResponse {
+  // refunded_deposit is any deposit that was refunded
+  repeated cosmos.base.v1beta1.Coin refunded_deposit = 1 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// MsgUpdateHeartbeat represents a message to update heartbeat for dead man's switch
+message MsgUpdateHeartbeat {
+  option (cosmos.msg.v1.signer) = "owner";
+  option (amino.name) = "cosmos-sdk/MsgUpdateHeartbeat";
+
+  // owner is the address of the capsule owner
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // capsule_id is the ID of the capsule to update heartbeat for
+  uint64 capsule_id = 2;
+  
+  // message is an optional message to include with the heartbeat
+  string message = 3;
+}
+
+// MsgUpdateHeartbeatResponse is the response for updating heartbeat
+message MsgUpdateHeartbeatResponse {
+  // next_heartbeat_deadline is when the next heartbeat is due
+  google.protobuf.Timestamp next_heartbeat_deadline = 1 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+}
+
+// MsgSubmitKeyShare represents a message to submit a key share
+message MsgSubmitKeyShare {
+  option (cosmos.msg.v1.signer) = "submitter";
+  option (amino.name) = "cosmos-sdk/MsgSubmitKeyShare";
+
+  // submitter is the address submitting the key share
+  string submitter = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // capsule_id is the ID of the capsule
+  uint64 capsule_id = 2;
+  
+  // key_share is the key share being submitted
+  KeyShare key_share = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgSubmitKeyShareResponse is the response for submitting a key share
+message MsgSubmitKeyShareResponse {
+  // shares_submitted is the number of shares submitted so far
+  uint32 shares_submitted = 1;
+  
+  // shares_required is the total number of shares required
+  uint32 shares_required = 2;
+  
+  // ready_to_unlock indicates if the capsule can now be unlocked
+  bool ready_to_unlock = 3;
+}
+
+// MsgUpdateParams is the Msg/UpdateParams request type.
+message MsgUpdateParams {
+  option (cosmos.msg.v1.signer) = "authority";
+  option (amino.name) = "cosmos-sdk/x/timecapsule/MsgUpdateParams";
+
+  // authority is the address that controls the module (defaults to x/gov unless overwritten).
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // params defines the module parameters to update.
+  //
+  // NOTE: All parameters must be supplied.
+  Params params = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// MsgUpdateParamsResponse defines the response structure for executing a
+// MsgUpdateParams message.
+message MsgUpdateParamsResponse {}

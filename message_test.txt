@@ -1,0 +1,20 @@
+🌟 MESSAGE SECRET POUR BOB 🌟
+
+Salut Bob !
+
+Ceci est un message secret d'Alice pour tester notre système de capsule temporelle.
+
+📅 Date de création : 11/08/2025
+⏰ Conditions d'ouverture : Capsule Time-Lock de 2 minutes
+🔐 Sécurité : Chiffrement AES-256-GCM
+🌐 Stockage : Blockchain (message < 1MB)
+
+Ce message prouve que :
+✅ Le chiffrement fonctionne
+✅ Le stockage est sécurisé  
+✅ Les transferts entre utilisateurs sont opérationnels
+✅ Les conditions temporelles sont respectées
+
+Merci de tester notre blockchain de capsule temporelle !
+
+Alice 💌

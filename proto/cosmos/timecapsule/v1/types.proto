@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package cosmos.timecapsule.v1;
+
+import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/cosmos/cosmos-sdk/x/timecapsule/types";
+
+// CapsuleType defines the type of time capsule
+enum CapsuleType {
+  // UNKNOWN is the default value
+  CAPSULE_TYPE_UNKNOWN = 0;
+  // SAFE is a simple storage capsule
+  CAPSULE_TYPE_SAFE = 1;
+  // TIME_LOCK is a time-locked capsule
+  CAPSULE_TYPE_TIME_LOCK = 2;
+  // CONDITIONAL is a condition-based capsule
+  CAPSULE_TYPE_CONDITIONAL = 3;
+  // MULTI_SIG is a multi-signature capsule
+  CAPSULE_TYPE_MULTI_SIG = 4;
+  // DEAD_MANS_SWITCH is a dead man's switch capsule
+  CAPSULE_TYPE_DEAD_MANS_SWITCH = 5;
+}
+
+// CapsuleStatus defines the status of a capsule
+enum CapsuleStatus {
+  // UNKNOWN is the default value
+  CAPSULE_STATUS_UNKNOWN = 0;
+  // ACTIVE means the capsule is locked and active
+  CAPSULE_STATUS_ACTIVE = 1;
+  // UNLOCKED means the capsule has been unlocked
+  CAPSULE_STATUS_UNLOCKED = 2;
+  // EXPIRED means the capsule has expired
+  CAPSULE_STATUS_EXPIRED = 3;
+  // CANCELLED means the capsule has been cancelled
+  CAPSULE_STATUS_CANCELLED = 4;
+}
+
+// Capsule represents a time capsule
+message Capsule {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // id is the unique identifier of the capsule
+  uint64 id = 1;
+  
+  // owner is the address of the capsule owner
+  string owner = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // capsule_type defines the type of capsule
+  CapsuleType capsule_type = 3;
+  
+  // status is the current status of the capsule
+  CapsuleStatus status = 4;
+  
+  // title is a human-readable title for the capsule
+  string title = 5;
+  
+  // description provides additional details about the capsule
+  string description = 6;
+  
+  // data contains the encrypted content of the capsule
+  bytes data = 7;
+  
+  // unlock_time specifies when the capsule can be unlocked (for TIME_LOCK type)
+  google.protobuf.Timestamp unlock_time = 8 [(gogoproto.stdtime) = true];
+  
+  // creation_time is when the capsule was created
+  google.protobuf.Timestamp creation_time = 9 [(gogoproto.stdtime) = true, (gogoproto.nullable) = false];
+  
+  // deposit represents any tokens deposited with the capsule
+  repeated cosmos.base.v1beta1.Coin deposit = 10 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  
+  // unlock_conditions contains condition-specific data for CONDITIONAL type
+  bytes unlock_conditions = 11;
+  
+  // required_signatures is the number of signatures needed for MULTI_SIG type
+  uint32 required_signatures = 12;
+  
+  // authorized_addresses are the addresses authorized to sign for MULTI_SIG type
+  repeated string authorized_addresses = 13 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // last_heartbeat is the last heartbeat timestamp for DEAD_MANS_SWITCH type
+  google.protobuf.Timestamp last_heartbeat = 14 [(gogoproto.stdtime) = true];
+  
+  // heartbeat_interval is the required heartbeat interval for DEAD_MANS_SWITCH type
+  int64 heartbeat_interval = 15;
+  
+  // beneficiaries are the addresses that can claim the capsule after unlock
+  repeated string beneficiaries = 16 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// KeyShare represents a share of the encryption key using Shamir's Secret Sharing
+message KeyShare {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // capsule_id is the ID of the capsule this key share belongs to
+  uint64 capsule_id = 1;
+  
+  // share_id is the identifier of this specific share
+  uint32 share_id = 2;
+  
+  // holder is the address holding this key share
+  string holder = 3 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // encrypted_share is the encrypted key share data
+  bytes encrypted_share = 4;
+  
+  // threshold is the minimum number of shares needed to reconstruct the key
+  uint32 threshold = 5;
+  
+  // total_shares is the total number of shares created
+  uint32 total_shares = 6;
+}
+
+// ConditionContract represents a smart contract condition
+message ConditionContract {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // address is the contract address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // method is the contract method to call
+  string method = 2;
+  
+  // params are the parameters to pass to the method
+  bytes params = 3;
+  
+  // expected_result is the expected return value
+  bytes expected_result = 4;
+}
+
+// Statistics holds various statistics about the timecapsule module
+message Statistics {
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // total_capsules is the total number of capsules created
+  uint64 total_capsules = 1;
+  
+  // active_capsules is the number of currently active capsules
+  uint64 active_capsules = 2;
+  
+  // unlocked_capsules is the number of unlocked capsules
+  uint64 unlocked_capsules = 3;
+  
+  // expired_capsules is the number of expired capsules
+  uint64 expired_capsules = 4;
+  
+  // cancelled_capsules is the number of cancelled capsules
+  uint64 cancelled_capsules = 5;
+  
+  // total_value_locked is the total value locked in all capsules
+  repeated cosmos.base.v1beta1.Coin total_value_locked = 6 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}

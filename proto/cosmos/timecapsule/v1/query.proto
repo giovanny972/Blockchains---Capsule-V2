@@ -1,0 +1,233 @@
+syntax = "proto3";
+
+package cosmos.timecapsule.v1;
+
+import "amino/amino.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
+import "cosmos/timecapsule/v1/types.proto";
+
+option go_package = "github.com/cosmos/cosmos-sdk/x/timecapsule/types";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params returns the module parameters
+  rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/params";
+  }
+
+  // Capsule returns a specific capsule by ID
+  rpc Capsule(QueryCapsuleRequest) returns (QueryCapsuleResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/capsules/{capsule_id}";
+  }
+
+  // Capsules returns all capsules with optional pagination
+  rpc Capsules(QueryCapsulesRequest) returns (QueryCapsulesResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/capsules";
+  }
+
+  // UserCapsules returns all capsules owned by a specific address
+  rpc UserCapsules(QueryUserCapsulesRequest) returns (QueryUserCapsulesResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/capsules/user/{owner}";
+  }
+
+  // CapsulesByType returns capsules filtered by type
+  rpc CapsulesByType(QueryCapsulesByTypeRequest) returns (QueryCapsulesByTypeResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/capsules/type/{capsule_type}";
+  }
+
+  // CapsulesByStatus returns capsules filtered by status
+  rpc CapsulesByStatus(QueryCapsulesByStatusRequest) returns (QueryCapsulesByStatusResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/capsules/status/{status}";
+  }
+
+  // KeyShares returns key shares for a specific capsule
+  rpc KeyShares(QueryKeySharesRequest) returns (QueryKeySharesResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/capsules/{capsule_id}/key-shares";
+  }
+
+  // ConditionContract returns details of a condition contract
+  rpc ConditionContract(QueryConditionContractRequest) returns (QueryConditionContractResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/condition-contracts/{address}";
+  }
+
+  // ConditionContracts returns all condition contracts
+  rpc ConditionContracts(QueryConditionContractsRequest) returns (QueryConditionContractsResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/condition-contracts";
+  }
+
+  // Stats returns module statistics
+  rpc Stats(QueryStatsRequest) returns (QueryStatsResponse) {
+    option (google.api.http).get = "/cosmos/timecapsule/v1/stats";
+  }
+}
+
+// QueryParamsRequest is the request type for the Query/Params RPC method
+message QueryParamsRequest {}
+
+// QueryParamsResponse is the response type for the Query/Params RPC method
+message QueryParamsResponse {
+  // params defines the parameters of the module
+  Params params = 1 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
+}
+
+// QueryCapsuleRequest is the request type for the Query/Capsule RPC method
+message QueryCapsuleRequest {
+  // capsule_id is the ID of the capsule to query
+  uint64 capsule_id = 1;
+}
+
+// QueryCapsuleResponse is the response type for the Query/Capsule RPC method
+message QueryCapsuleResponse {
+  // capsule is the requested capsule
+  Capsule capsule = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryCapsulesRequest is the request type for the Query/Capsules RPC method
+message QueryCapsulesRequest {
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryCapsulesResponse is the response type for the Query/Capsules RPC method
+message QueryCapsulesResponse {
+  // capsules is the list of all capsules
+  repeated Capsule capsules = 1 [(gogoproto.nullable) = false];
+  
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryUserCapsulesRequest is the request type for the Query/UserCapsules RPC method
+message QueryUserCapsulesRequest {
+  // owner is the address of the capsule owner
+  string owner = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryUserCapsulesResponse is the response type for the Query/UserCapsules RPC method
+message QueryUserCapsulesResponse {
+  // capsules is the list of capsules owned by the user
+  repeated Capsule capsules = 1 [(gogoproto.nullable) = false];
+  
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryCapsulesByTypeRequest is the request type for the Query/CapsulesByType RPC method
+message QueryCapsulesByTypeRequest {
+  // capsule_type is the type to filter by
+  CapsuleType capsule_type = 1;
+  
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryCapsulesByTypeResponse is the response type for the Query/CapsulesByType RPC method
+message QueryCapsulesByTypeResponse {
+  // capsules is the list of capsules of the specified type
+  repeated Capsule capsules = 1 [(gogoproto.nullable) = false];
+  
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryCapsulesByStatusRequest is the request type for the Query/CapsulesByStatus RPC method
+message QueryCapsulesByStatusRequest {
+  // status is the status to filter by
+  CapsuleStatus status = 1;
+  
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryCapsulesByStatusResponse is the response type for the Query/CapsulesByStatus RPC method
+message QueryCapsulesByStatusResponse {
+  // capsules is the list of capsules with the specified status
+  repeated Capsule capsules = 1 [(gogoproto.nullable) = false];
+  
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryKeySharesRequest is the request type for the Query/KeyShares RPC method
+message QueryKeySharesRequest {
+  // capsule_id is the ID of the capsule
+  uint64 capsule_id = 1;
+}
+
+// QueryKeySharesResponse is the response type for the Query/KeyShares RPC method
+message QueryKeySharesResponse {
+  // key_shares is the list of key shares for the capsule
+  repeated KeyShare key_shares = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryConditionContractRequest is the request type for the Query/ConditionContract RPC method
+message QueryConditionContractRequest {
+  // address is the contract address
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// QueryConditionContractResponse is the response type for the Query/ConditionContract RPC method
+message QueryConditionContractResponse {
+  // contract is the condition contract details
+  ConditionContract contract = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryConditionContractsRequest is the request type for the Query/ConditionContracts RPC method
+message QueryConditionContractsRequest {
+  // pagination defines an optional pagination for the request
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryConditionContractsResponse is the response type for the Query/ConditionContracts RPC method
+message QueryConditionContractsResponse {
+  // contracts is the list of all condition contracts
+  repeated ConditionContract contracts = 1 [(gogoproto.nullable) = false];
+  
+  // pagination defines the pagination in the response
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QueryStatsRequest is the request type for the Query/Stats RPC method
+message QueryStatsRequest {}
+
+// QueryStatsResponse is the response type for the Query/Stats RPC method
+message QueryStatsResponse {
+  // stats contains the module statistics
+  Statistics stats = 1 [(gogoproto.nullable) = false];
+}
+
+// Params defines the parameters for the timecapsule module
+message Params {
+  option (amino.name) = "cosmos-sdk/x/timecapsule/Params";
+  option (gogoproto.equal) = true;
+  option (gogoproto.goproto_stringer) = false;
+
+  // max_capsule_size is the maximum size allowed for capsule data
+  uint64 max_capsule_size = 1;
+  
+  // min_deposit is the minimum deposit required to create a capsule
+  repeated cosmos.base.v1beta1.Coin min_deposit = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  
+  // max_unlock_duration is the maximum duration a capsule can be locked
+  int64 max_unlock_duration = 3;
+  
+  // encryption_fee is the fee charged for encryption services
+  repeated cosmos.base.v1beta1.Coin encryption_fee = 4 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  
+  // allowed_capsule_types are the capsule types that are enabled
+  repeated CapsuleType allowed_capsule_types = 5;
+}

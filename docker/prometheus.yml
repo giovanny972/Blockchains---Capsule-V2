@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'capsule-node'
+    static_configs:
+      - targets: ['capsule-node:26660']  # Cosmos SDK metrics endpoint
+    scrape_interval: 5s
+    metrics_path: /metrics
+
+  - job_name: 'tendermint'
+    static_configs:
+      - targets: ['capsule-node:26657']  # Tendermint metrics
+    scrape_interval: 5s
+    metrics_path: /metrics
