@@ -49,7 +49,8 @@
       "Bash(grep:*)",
       "Bash(./simapp/simd/simd.exe version)",
       "Bash(./simapp/simd/simd.exe --help)",
-      "Bash(go:*)"
+      "Bash(go:*)",
+      "Bash(./simapp/simd/simd.exe genesis:*)"
     ],
     "deny": []
   }

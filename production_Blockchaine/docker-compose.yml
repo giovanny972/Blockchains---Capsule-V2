@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  capsule-node:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    container_name: capsule-blockchain
+    restart: unless-stopped
+    ports:
+      - "26656:26656"  # P2P port
+      - "26657:26657"  # RPC port
+      - "1317:1317"    # REST API port
+      - "9090:9090"    # gRPC port
+    volumes:
+      - capsule_data:/cosmos/.simd
+    environment:
+      - SIMD_HOME=/cosmos/.simd
+    command: >
+      sh -c "
+        if [ ! -f /cosmos/.simd/config/genesis.json ]; then
+          echo 'Initializing node...'
+          simd init capsule-node --chain-id capsule-1 --home /cosmos/.simd --overwrite
+          simd keys add validator --home /cosmos/.simd --keyring-backend test --output json > /tmp/validator.json
+          simd genesis add-genesis-account validator 100000000stake --home /cosmos/.simd --keyring-backend test
+          simd genesis gentx validator 70000000stake --chain-id capsule-1 --home /cosmos/.simd --keyring-backend test
+          simd genesis collect-gentxs --home /cosmos/.simd
+        fi
+        echo 'Starting blockchain...'
+        simd start --home /cosmos/.simd
+      "
+    healthcheck:
+      test: ["CMD", "simd", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  capsule_data:
+    driver: local
