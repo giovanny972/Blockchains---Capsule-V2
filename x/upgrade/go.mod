@@ -21,7 +21,7 @@ require (
 	github.com/spf13/cast v1.5.1
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.11.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20230920204549-e6e6cdab5c13
 	google.golang.org/grpc v1.58.3
 	google.golang.org/protobuf v1.31.0
