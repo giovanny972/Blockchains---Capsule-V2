@@ -24,7 +24,7 @@ WORKDIR /go/src/github.com/cosmos/cosmos-sdk
 # optimization: if go.sum didn't change, docker will use cached image
 COPY go.mod go.sum ./
 
-# Copy ALL module go.mod files to avoid missing module errors
+# Copy ONLY existing module go.mod files
 COPY collections/go.mod collections/go.sum ./collections/
 COPY store/go.mod store/go.sum ./store/
 COPY log/go.mod log/go.sum ./log/
@@ -35,26 +35,16 @@ COPY math/go.mod math/go.sum ./math/
 COPY orm/go.mod orm/go.sum ./orm/
 COPY client/v2/go.mod client/v2/go.sum ./client/v2/
 
-# Copy ALL x/ modules go.mod files
+# Copy ONLY x/ modules that have their own go.mod files
 COPY x/accounts/go.mod x/accounts/go.sum ./x/accounts/
-COPY x/auth/go.mod x/auth/go.sum ./x/auth/
-COPY x/authz/go.mod x/authz/go.sum ./x/authz/
-COPY x/bank/go.mod x/bank/go.sum ./x/bank/
 COPY x/circuit/go.mod x/circuit/go.sum ./x/circuit/
-COPY x/consensus/go.mod x/consensus/go.sum ./x/consensus/
-COPY x/distribution/go.mod x/distribution/go.sum ./x/distribution/
 COPY x/evidence/go.mod x/evidence/go.sum ./x/evidence/
 COPY x/feegrant/go.mod x/feegrant/go.sum ./x/feegrant/
-COPY x/gov/go.mod x/gov/go.sum ./x/gov/
-COPY x/group/go.mod x/group/go.sum ./x/group/
-COPY x/mint/go.mod x/mint/go.sum ./x/mint/
 COPY x/nft/go.mod x/nft/go.sum ./x/nft/
 COPY x/params/go.mod x/params/go.sum ./x/params/
 COPY x/protocolpool/go.mod x/protocolpool/go.sum ./x/protocolpool/
-COPY x/slashing/go.mod x/slashing/go.sum ./x/slashing/
-COPY x/staking/go.mod x/staking/go.sum ./x/staking/
+COPY x/tx/go.mod x/tx/go.sum ./x/tx/
 COPY x/upgrade/go.mod x/upgrade/go.sum ./x/upgrade/
-COPY x/timecapsule/go.mod x/timecapsule/go.sum ./x/timecapsule/
 
 RUN go mod download
 
