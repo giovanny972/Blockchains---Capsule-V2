@@ -33,11 +33,14 @@ echo "Validator address: $VALIDATOR_ADDRESS"
 
 # 3. Ajouter le compte au genesis avec des fonds
 echo "💰 Step 3/5: Adding genesis account..."
-simd genesis add-genesis-account "$VALIDATOR_ADDRESS" 100000000000stake,10000000000ucaps --home "$HOME_DIR"
+# Total Supply: 1B STAKE + 100M UCAPS
+# Validator allocation: 500M STAKE (50% for staking + reserve) + 10M UCAPS (10% ecosystem)
+simd genesis add-genesis-account "$VALIDATOR_ADDRESS" 500000000stake,10000000ucaps --home "$HOME_DIR"
 
 # 4. Créer la transaction genesis pour le validator
 echo "🏛️  Step 4/5: Creating genesis validator..."
-simd genesis gentx validator 10000000000stake \
+# Stake 200M (40% of validator allocation) to secure the network
+simd genesis gentx validator 200000000stake \
     --chain-id "$CHAIN_ID" \
     --keyring-backend test \
     --home "$HOME_DIR"
