@@ -62,8 +62,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH make build
 FROM alpine:3
 
 EXPOSE 26656 26657 1317 9090
-# Run simd by default, omit entrypoint to ease using container with simcli
-CMD ["simd"]
+
 STOPSIGNAL SIGTERM
 WORKDIR /root
 
@@ -72,3 +71,10 @@ RUN apk add --no-cache curl make bash jq sed
 
 # Copy over binaries from the build-env
 COPY --from=build-env /go/src/github.com/cosmos/cosmos-sdk/build/simd /usr/bin/simd
+
+# Copy startup script
+COPY scripts/start-blockchain.sh /usr/local/bin/start-blockchain.sh
+RUN chmod +x /usr/local/bin/start-blockchain.sh
+
+# Use startup script as entrypoint
+CMD ["/usr/local/bin/start-blockchain.sh"]
