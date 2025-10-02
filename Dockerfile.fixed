@@ -1,0 +1,89 @@
+# Dockerfile optimisé pour Cosmos SDK avec tous les modules
+# Compatible avec Dokploy et multi-architecture
+
+FROM golang:1.21-alpine AS build-env
+
+# Install dependencies
+ENV PACKAGES curl make git libc-dev bash gcc linux-headers eudev-dev
+RUN apk add --no-cache $PACKAGES
+
+# Set working directory
+WORKDIR /go/src/github.com/cosmos/cosmos-sdk
+
+# Copy ALL go.mod files first (optimisation Docker cache)
+COPY go.mod go.sum ./
+
+# Copy ALL module go.mod files to avoid missing module errors
+COPY collections/go.mod collections/go.sum ./collections/
+COPY store/go.mod store/go.sum ./store/
+COPY log/go.mod log/go.sum ./log/
+COPY core/go.mod core/go.sum ./core/
+COPY depinject/go.mod depinject/go.sum ./depinject/
+COPY errors/go.mod errors/go.sum ./errors/
+COPY math/go.mod math/go.sum ./math/
+COPY orm/go.mod orm/go.sum ./orm/
+COPY client/v2/go.mod client/v2/go.sum ./client/v2/
+
+# Copy ALL x/ modules go.mod files
+COPY x/accounts/go.mod x/accounts/go.sum ./x/accounts/
+COPY x/auth/go.mod x/auth/go.sum ./x/auth/
+COPY x/authz/go.mod x/authz/go.sum ./x/authz/
+COPY x/bank/go.mod x/bank/go.sum ./x/bank/
+COPY x/circuit/go.mod x/circuit/go.sum ./x/circuit/
+COPY x/consensus/go.mod x/consensus/go.sum ./x/consensus/
+COPY x/distribution/go.mod x/distribution/go.sum ./x/distribution/
+COPY x/evidence/go.mod x/evidence/go.sum ./x/evidence/
+COPY x/feegrant/go.mod x/feegrant/go.sum ./x/feegrant/
+COPY x/gov/go.mod x/gov/go.sum ./x/gov/
+COPY x/group/go.mod x/group/go.sum ./x/group/
+COPY x/mint/go.mod x/mint/go.sum ./x/mint/
+COPY x/nft/go.mod x/nft/go.sum ./x/nft/
+COPY x/params/go.mod x/params/go.sum ./x/params/
+COPY x/protocolpool/go.mod x/protocolpool/go.sum ./x/protocolpool/
+COPY x/slashing/go.mod x/slashing/go.sum ./x/slashing/
+COPY x/staking/go.mod x/staking/go.sum ./x/staking/
+COPY x/upgrade/go.mod x/upgrade/go.sum ./x/upgrade/
+COPY x/timecapsule/go.mod x/timecapsule/go.sum ./x/timecapsule/
+
+# Download dependencies (this will be cached if go.mod files don't change)
+RUN go mod download
+
+# Copy the rest of the source code
+COPY . .
+
+# Cross-compilation arguments
+ARG TARGETOS
+ARG TARGETARCH
+
+# Build the application
+RUN GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} make build
+
+# Final stage - minimal image
+FROM alpine:3
+
+# Expose ports
+EXPOSE 26656 26657 1317 9090
+
+# Default command
+CMD ["simd"]
+STOPSIGNAL SIGTERM
+
+# Working directory
+WORKDIR /root
+
+# Install runtime dependencies
+RUN apk add --no-cache curl make bash jq sed ca-certificates
+
+# Copy binary from build stage
+COPY --from=build-env /go/src/github.com/cosmos/cosmos-sdk/build/simd /usr/bin/simd
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:26657/health || exit 1
+
+# Add non-root user for security
+RUN addgroup -g 1000 cosmos && \
+    adduser -D -u 1000 -G cosmos cosmos && \
+    chown -R cosmos:cosmos /root
+
+USER cosmos

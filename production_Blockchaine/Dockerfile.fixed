@@ -1,0 +1,65 @@
+# Dockerfile corrigé pour Capsule Network
+FROM golang:1.24-alpine AS builder
+
+# Installation des dépendances de build
+RUN apk add --no-cache git make gcc musl-dev linux-headers
+
+# Définir le répertoire de travail
+WORKDIR /cosmos
+
+# Copier le code source local au lieu de cloner
+COPY .. .
+
+# Aller dans le répertoire simapp et télécharger les dépendances
+RUN cd simapp && \
+    go mod download
+
+# Construire le binaire simd
+RUN cd simapp && \
+    CGO_ENABLED=1 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    go build -mod=readonly \
+    -tags "netgo,ledger,muslc" \
+    -ldflags '-X github.com/cosmos/cosmos-sdk/version.Name=capsule \
+              -X github.com/cosmos/cosmos-sdk/version.AppName=simd \
+              -X github.com/cosmos/cosmos-sdk/version.Version=v0.50.0 \
+              -w -s -linkmode=external -extldflags "-Wl,-z,muldefs -static"' \
+    -trimpath \
+    -o /cosmos/build/simd ./cmd/simd
+
+# Image de production finale
+FROM alpine:3.18
+
+# Installer ca-certificates pour TLS
+RUN apk add --no-cache ca-certificates tzdata
+
+# Créer un utilisateur non-root pour la sécurité
+RUN addgroup -g 1000 cosmos && \
+    adduser -u 1000 -G cosmos -D -h /cosmos cosmos
+
+# Définir le répertoire de travail
+WORKDIR /cosmos
+
+# Copier le binaire depuis le builder
+COPY --from=builder /cosmos/build/simd /usr/bin/simd
+
+# Définir les permissions
+RUN chmod +x /usr/bin/simd
+
+# Créer les répertoires nécessaires
+RUN mkdir -p /cosmos/.simd/config /cosmos/.simd/data && \
+    chown -R cosmos:cosmos /cosmos
+
+# Passer à l'utilisateur non-root
+USER cosmos
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD simd status || exit 1
+
+# Exposer les ports
+EXPOSE 26656 26657 1317 9090
+
+# Commande par défaut
+CMD ["simd", "start"]

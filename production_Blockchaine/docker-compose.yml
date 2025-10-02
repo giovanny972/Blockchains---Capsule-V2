@@ -3,8 +3,8 @@ version: '3.8'
 services:
   capsule-node:
     build:
-      context: .
-      dockerfile: Dockerfile.simple
+      context: ..
+      dockerfile: production_blockchaine/Dockerfile.fixed
     container_name: capsule-blockchain
     restart: unless-stopped
     ports:
